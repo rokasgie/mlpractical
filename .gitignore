@@ -62,7 +62,9 @@ target/
 
 # Pycharm
 .idea/*
-
+*/.DS_Store
 
 #Notebook stuff
 notebooks/.ipynb_checkpoints/
+
+data
