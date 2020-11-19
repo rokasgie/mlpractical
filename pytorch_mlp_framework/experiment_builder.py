@@ -43,25 +43,25 @@ class ExperimentBuilder(nn.Module):
         elif torch.cuda.device_count() == 1 and use_gpu:
             self.device =  torch.cuda.current_device()
             self.model.to(self.device)  # sends the model from the cpu to the gpu
-            print('Use GPU', self.device)
+            # print('Use GPU', self.device)
         else:
             print("use CPU")
             self.device = torch.device('cpu')  # sets the device to be CPU
-            print(self.device)
+            # print(self.device)
 
-        print('here')
+        # print('here')
 
         self.model.reset_parameters()  # re-initialize network parameters
         self.train_data = train_data
         self.val_data = val_data
         self.test_data = test_data
 
-        print('System learnable parameters')
+        # print('System learnable parameters')
         num_conv_layers = 0
         num_linear_layers = 0
         total_num_parameters = 0
         for name, value in self.named_parameters():
-            print(name, value.shape)
+            # print(name, value.shape)
             if all(item in name for item in ['conv', 'weight']):
                 num_conv_layers += 1
             if all(item in name for item in ['linear', 'weight']):
@@ -71,6 +71,8 @@ class ExperimentBuilder(nn.Module):
         print('Total number of parameters', total_num_parameters)
         print('Total number of conv layers', num_conv_layers)
         print('Total number of linear layers', num_linear_layers)
+
+        print(self)
 
         self.optimizer = optim.Adam(self.parameters(), amsgrad=False,
                                     weight_decay=weight_decay_coefficient)
@@ -120,8 +122,6 @@ class ExperimentBuilder(nn.Module):
 
 
     def plot_func_def(self,all_grads, layers):
-        
-       
         """
         Plot function definition to plot the average gradient with respect to the number of layers in the given model
         :param all_grads: Gradients wrt weights for each layer in the model.
@@ -151,10 +151,20 @@ class ExperimentBuilder(nn.Module):
         layers = []
         
         """
-        Complete the code in the block below to collect absolute mean of the gradients for each layer in all_grads with the             layer names in layers.
+        Complete the code in the block below to collect absolute mean of the gradients for each layer in all_grads with the
+        layer names in layers.
         """
         ########################################
-        
+
+        for n, p in self.named_parameters():
+            if p.requires_grad and ("bias" not in n):
+                names = n.split(".")
+                if len(names) == 6:
+                    name = "{}_{}".format(names[2], names[4])
+                else:
+                    name = names[1]
+                layers.append(name)
+                all_grads.append(p.grad.abs().mean())
         
         ########################################
             

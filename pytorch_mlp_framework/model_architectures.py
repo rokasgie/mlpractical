@@ -26,7 +26,7 @@ class FCCNetwork(nn.Module):
         self.build_module()
 
     def build_module(self):
-        print("Building basic block of FCCNetwork using input shape", self.input_shape)
+        # print("Building basic block of FCCNetwork using input shape", self.input_shape)
         x = torch.zeros((self.input_shape))
 
         out = x
@@ -46,7 +46,7 @@ class FCCNetwork(nn.Module):
                                              out_features=self.num_output_classes,
                                              bias=self.use_bias)
         out = self.logits_linear_layer(out)  # apply the layer to the previous layer's outputs
-        print("Block is built, output volume is", out.shape)
+        # print("Block is built, output volume is", out.shape)
         return out
 
     def forward(self, x):
@@ -130,7 +130,7 @@ class EntryConvolutionalBlock(nn.Module):
         self.layer_dict['bn_0'] = nn.BatchNorm2d(num_features=out.shape[1])
         out = F.leaky_relu(self.layer_dict['bn_0'].forward(out))
 
-        print(out.shape)
+        # print(out.shape)
 
     def forward(self, x):
         out = x
@@ -173,7 +173,7 @@ class ConvolutionalProcessingBlock(nn.Module):
         out = self.layer_dict['conv_1'].forward(out)
         out = F.leaky_relu(out)
 
-        print(out.shape)
+        # print(out.shape)
 
     def forward(self, x):
         out = x
@@ -221,7 +221,7 @@ class ConvolutionalDimensionalityReductionBlock(nn.Module):
         out = self.layer_dict['conv_1'].forward(out)
         out = F.leaky_relu(out)
 
-        print(out.shape)
+        # print(out.shape)
 
     def forward(self, x):
         out = x
@@ -274,7 +274,7 @@ class ConvolutionalNetwork(nn.Module):
         """
         self.layer_dict = nn.ModuleDict()
         # initialize a module dict, which is effectively a dictionary that can collect layers and integrate them into pytorch
-        print("Building basic block of ConvolutionalNetwork using input shape", self.input_shape)
+        # print("Building basic block of ConvolutionalNetwork using input shape", self.input_shape)
         x = torch.zeros((self.input_shape))  # create dummy inputs to be used to infer shapes of layers
 
         out = x
@@ -300,13 +300,13 @@ class ConvolutionalNetwork(nn.Module):
             out = self.layer_dict['reduction_block_{}'.format(i)].forward(out)
 
         out = F.avg_pool2d(out, out.shape[-1])
-        print('shape before final linear layer', out.shape)
+        # print('shape before final linear layer', out.shape)
         out = out.view(out.shape[0], -1)
         self.logit_linear_layer = nn.Linear(in_features=out.shape[1],  # add a linear layer
                                             out_features=self.num_output_classes,
                                             bias=True)
         out = self.logit_linear_layer(out)  # apply linear layer on flattened inputs
-        print("Block is built, output volume is", out.shape)
+        # print("Block is built, output volume is", out.shape)
         return out
 
     def forward(self, x):
