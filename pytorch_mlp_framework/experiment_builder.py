@@ -14,7 +14,7 @@ matplotlib.rcParams.update({'font.size': 8})
 
 class ExperimentBuilder(nn.Module):
     def __init__(self, network_model, experiment_name, num_epochs, train_data, val_data,
-                 test_data, weight_decay_coefficient, use_gpu, continue_from_epoch=-1):
+                 test_data, learning_rate, weight_decay_coefficient, use_gpu, continue_from_epoch=-1):
         """
         Initializes an ExperimentBuilder object. Such an object takes care of running training and evaluation of a deep net
         on a given dataset. It also takes care of saving per epoch models and automatically inferring the best val model
@@ -25,6 +25,7 @@ class ExperimentBuilder(nn.Module):
         :param train_data: An object of the DataProvider type. Contains the training set.
         :param val_data: An object of the DataProvider type. Contains the val set.
         :param test_data: An object of the DataProvider type. Contains the test set.
+        :param learning_rate: A float indicating the learning rate
         :param weight_decay_coefficient: A float indicating the weight decay to use with the adam optimizer.
         :param use_gpu: A boolean indicating whether to use a GPU or not.
         :param continue_from_epoch: An int indicating whether we'll start from scrach (-1) or whether we'll reload a previously saved model of epoch 'continue_from_epoch' and continue training from there.
@@ -74,11 +75,14 @@ class ExperimentBuilder(nn.Module):
 
         print(self)
 
-        self.optimizer = optim.Adam(self.parameters(), amsgrad=False,
+        self.optimizer = optim.Adam(self.parameters(), lr=learning_rate, amsgrad=False,
                                     weight_decay=weight_decay_coefficient)
-        self.learning_rate_scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer,
-                                                                            T_max=num_epochs,
-                                                                            eta_min=0.00002)
+        # self.learning_rate_scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer,
+        #                                                                     T_max=num_epochs,
+        #                                                                     eta_min=0.00002)
+
+        self.learning_rate_scheduler = optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=1)
+
         # Generate the directory names
         self.experiment_folder = os.path.abspath(experiment_name)
         self.experiment_logs = os.path.abspath(os.path.join(self.experiment_folder, "result_outputs"))
@@ -156,11 +160,11 @@ class ExperimentBuilder(nn.Module):
         """
         ########################################
 
-        for n, p in self.named_parameters():
-            if p.requires_grad and ("bias" not in n):
+        for n, p in named_parameters:
+            if p.requires_grad and "bias" not in n:
                 names = n.split(".")
-                if len(names) == 6:
-                    name = "{}_{}".format(names[2], names[4])
+                if len(names) == 5:
+                    name = "{}_{}".format(names[1], names[3])
                 else:
                     name = names[1]
                 layers.append(name)
@@ -172,10 +176,7 @@ class ExperimentBuilder(nn.Module):
         plt = self.plot_func_def(all_grads, layers)
         
         return plt
-    
-    
-    
-    
+
     def run_train_iter(self, x, y):
         
         self.train()  # sets model to training mode (in case batch normalization or other methods have different procedures for training and evaluation)
@@ -188,9 +189,9 @@ class ExperimentBuilder(nn.Module):
 
         self.optimizer.zero_grad()  # set all weight grads from previous training iters to 0
         loss.backward()  # backpropagate to compute gradients for current iter loss
-        
-        self.learning_rate_scheduler.step(epoch=self.current_epoch)
+
         self.optimizer.step()  # update network parameters
+
         _, predicted = torch.max(out.data, 1)  # get argmax of predictions
         accuracy = np.mean(list(predicted.eq(y.data).cpu()))  # compute accuracy
         return loss.cpu().data.numpy(), accuracy
@@ -261,6 +262,7 @@ class ExperimentBuilder(nn.Module):
                     current_epoch_losses["train_acc"].append(accuracy)  # add current iter acc to the train acc list
                     pbar_train.update(1)
                     pbar_train.set_description("loss: {:.4f}, accuracy: {:.4f}".format(loss, accuracy))
+                self.learning_rate_scheduler.step()
 
             with tqdm.tqdm(total=len(self.val_data)) as pbar_val:  # create a progress bar for validation
                 for x, y in self.val_data:  # get data batches

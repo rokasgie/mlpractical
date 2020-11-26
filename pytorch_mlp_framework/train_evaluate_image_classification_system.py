@@ -1,5 +1,4 @@
 import numpy as np
-import torch
 from torch.utils.data import DataLoader
 from torchvision import transforms
 
@@ -7,8 +6,6 @@ import mlp.data_providers as data_providers
 from pytorch_mlp_framework.arg_extractor import get_args
 from pytorch_mlp_framework.experiment_builder import ExperimentBuilder
 from pytorch_mlp_framework.model_architectures import *
-import os 
-# os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 args = get_args()  # get arguments from command line
 rng = np.random.RandomState(seed=args.seed)  # set the seeds for the experiment
@@ -47,6 +44,9 @@ if args.block_type == 'conv_block':
 elif args.block_type == 'empty_block':
     processing_block_type = EmptyBlock
     dim_reduction_block_type = EmptyBlock
+elif args.block_type == 'batchnorm_block':
+    processing_block_type = BatchNormProcessingBlock
+    dim_reduction_block_type = BatchNormDimensionalityReductionBlock
 else:
     raise ModuleNotFoundError
 
@@ -60,6 +60,7 @@ custom_conv_net = ConvolutionalNetwork(  # initialize our network object, in thi
 conv_experiment = ExperimentBuilder(network_model=custom_conv_net,
                                     experiment_name=args.experiment_name,
                                     num_epochs=args.num_epochs,
+                                    learning_rate=args.lr,
                                     weight_decay_coefficient=args.weight_decay_coefficient,
                                     use_gpu=args.use_gpu,
                                     continue_from_epoch=args.continue_from_epoch,

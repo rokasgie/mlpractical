@@ -19,7 +19,9 @@ def get_args():
         description='Welcome to the MLP course\'s Pytorch training and inference helper script')
 
     parser.add_argument('--batch_size', nargs="?", type=int, default=100, help='Batch_size for experiment')
-    parser.add_argument('--continue_from_epoch', nargs="?", type=int, default=-1, help='Epoch you want to continue training from while restarting an experiment')
+    parser.add_argument('--lr', nargs="?", type=float, default=0.001, help='Learning rate')
+    parser.add_argument('--continue_from_epoch', nargs="?", type=int, default=-1,
+                        help='Epoch you want to continue training from while restarting an experiment')
     parser.add_argument('--seed', nargs="?", type=int, default=7112018,
                         help='Seed to use for random number generator for experiment')
     parser.add_argument('--image_num_channels', nargs="?", type=int, default=3,
@@ -39,7 +41,7 @@ def get_args():
                              'dimensionality reduction layers)')
     parser.add_argument('--num_epochs', nargs="?", type=int, default=100, help='Total number of epochs for model training')
     parser.add_argument('--num_classes', nargs="?", type=int, default=100, help='Number of classes in the dataset')
-    parser.add_argument('--num_workers', nargs="?", type=int, default=8, help='Number of dataloader workers')
+    parser.add_argument('--num_workers', nargs="?", type=int, default=6, help='Number of dataloader workers')
     parser.add_argument('--experiment_name', nargs="?", type=str, default="exp_1",
                         help='Experiment name - to be used for building the experiment folder')
     parser.add_argument('--use_gpu', nargs="?", type=str2bool, default=True,
@@ -50,5 +52,5 @@ def get_args():
                         help='Type of convolutional blocks to use in our network '
                              '(This argument will be useful in running experiments to debug your network)')
     args = parser.parse_args()
-    print(args)
+    # print(args)
     return args
