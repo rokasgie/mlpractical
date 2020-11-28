@@ -70,9 +70,8 @@ class ExperimentBuilder(nn.Module):
             total_num_parameters += np.prod(value.shape)
 
         print('Total number of parameters', total_num_parameters)
-        print('Total number of conv layers', num_conv_layers)
-        print('Total number of linear layers', num_linear_layers)
-
+        # print('Total number of conv layers', num_conv_layers)
+        # print('Total number of linear layers', num_linear_layers)
         #print(self)
 
         self.optimizer = optim.Adam(self.parameters(), lr=learning_rate, amsgrad=False,
