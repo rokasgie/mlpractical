@@ -36,7 +36,7 @@ def get_args():
                         help='Number of convolutional blocks in each stage, not including the reduction stage.'
                              ' A convolutional block is made up of two convolutional layers activated using the '
                              ' leaky-relu non-linearity')
-    parser.add_argument('--num_filters', nargs="?", type=int, default=16,
+    parser.add_argument('--num_filters', nargs="?", type=int, default=32,
                         help='Number of convolutional filters per convolutional layer in the network (excluding '
                              'dimensionality reduction layers)')
     parser.add_argument('--num_epochs', nargs="?", type=int, default=100, help='Total number of epochs for model training')
