@@ -374,6 +374,9 @@ class BatchNormProcessingBlock(nn.Module):
         self.layer_dict['bn_1'] = nn.BatchNorm2d(num_features=out.shape[1])
         out = F.leaky_relu(self.layer_dict['bn_1'].forward(out))
 
+        self.layer_dict["drop_0"] = nn.Dropout(p=0.2)
+        out = self.layer_dict["drop_0"].forward(out)
+
         # print(out.shape)
 
     def forward(self, x):
@@ -384,6 +387,8 @@ class BatchNormProcessingBlock(nn.Module):
 
         out = self.layer_dict['conv_1'].forward(out)
         out = F.leaky_relu(self.layer_dict['bn_1'].forward(out))
+
+        out = self.layer_dict["drop_0"].forward(out)
 
         return out
 
@@ -424,6 +429,9 @@ class BatchNormDimensionalityReductionBlock(nn.Module):
         self.layer_dict['bn_1'] = nn.BatchNorm2d(num_features=out.shape[1])
         out = F.leaky_relu(self.layer_dict['bn_1'].forward(out))
 
+        self.layer_dict["drop_0"] = nn.Dropout(p=0.2)
+        out = self.layer_dict["drop_0"].forward(out)
+
         # print(out.shape)
 
     def forward(self, x):
@@ -436,5 +444,7 @@ class BatchNormDimensionalityReductionBlock(nn.Module):
 
         out = self.layer_dict['conv_1'].forward(out)
         out = F.leaky_relu(self.layer_dict['bn_1'].forward(out))
+
+        out = self.layer_dict["drop_0"].forward(out)
 
         return out
