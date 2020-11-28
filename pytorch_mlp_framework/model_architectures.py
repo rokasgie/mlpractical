@@ -374,7 +374,7 @@ class BatchNormProcessingBlock(nn.Module):
         self.layer_dict['bn_1'] = nn.BatchNorm2d(num_features=out.shape[1])
         out = F.leaky_relu(self.layer_dict['bn_1'].forward(out))
 
-        self.layer_dict["drop_0"] = nn.Dropout(p=0.2)
+        self.layer_dict["drop_0"] = nn.Dropout(p=0.01)
         out = self.layer_dict["drop_0"].forward(out)
 
         # print(out.shape)
@@ -383,12 +383,14 @@ class BatchNormProcessingBlock(nn.Module):
         out = x
 
         out = self.layer_dict['conv_0'].forward(out)
-        out = F.leaky_relu(self.layer_dict['bn_0'].forward(out))
+        #out = self.layer_dict['bn_0'].forward(out)
+        out = F.leaky_relu(out)
 
         out = self.layer_dict['conv_1'].forward(out)
-        out = F.leaky_relu(self.layer_dict['bn_1'].forward(out))
+        out = self.layer_dict['bn_1'].forward(out)
+        out = F.leaky_relu(out)
 
-        out = self.layer_dict["drop_0"].forward(out)
+        # out = self.layer_dict["drop_0"].forward(out)
 
         return out
 
@@ -429,7 +431,7 @@ class BatchNormDimensionalityReductionBlock(nn.Module):
         self.layer_dict['bn_1'] = nn.BatchNorm2d(num_features=out.shape[1])
         out = F.leaky_relu(self.layer_dict['bn_1'].forward(out))
 
-        self.layer_dict["drop_0"] = nn.Dropout(p=0.2)
+        self.layer_dict["drop_0"] = nn.Dropout(p=0.01)
         out = self.layer_dict["drop_0"].forward(out)
 
         # print(out.shape)
@@ -438,13 +440,15 @@ class BatchNormDimensionalityReductionBlock(nn.Module):
         out = x
 
         out = self.layer_dict['conv_0'].forward(out)
-        out = F.leaky_relu(self.layer_dict['bn_0'].forward(out))
+        out = self.layer_dict['bn_0'].forward(out) 
+        out = F.leaky_relu(out)
 
         out = F.avg_pool2d(out, self.reduction_factor)
 
         out = self.layer_dict['conv_1'].forward(out)
-        out = F.leaky_relu(self.layer_dict['bn_1'].forward(out))
+        #out = self.layer_dict['bn_1'].forward(out)
+        out = F.leaky_relu(out)
 
-        out = self.layer_dict["drop_0"].forward(out)
+        #out = self.layer_dict["drop_0"].forward(out)
 
         return out
