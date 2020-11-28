@@ -125,6 +125,41 @@ class ExperimentBuilder(nn.Module):
 
         return total_num_params
 
+    def plot_weight_flow(self, named_parameters):
+        """
+        The function is being called in Line 298 of this file.
+        Receives the parameters of the model being trained. Returns plot of gradient flow for the given model parameters.
+
+        """
+        all_grads = []
+        layers = []
+
+        """
+        Complete the code in the block below to collect absolute mean of the gradients for each layer in all_grads with the
+        layer names in layers.
+        """
+        ########################################
+
+        for n, p in named_parameters:
+            if p.requires_grad and "bias" not in n:
+                names = n.split(".")
+                if len(names) == 5:
+                    name = "{}_{}".format(names[1], names[3])
+                else:
+                    name = names[1]
+                layers.append(name)
+                all_grads.append(p.data.abs().mean())
+
+        ########################################
+
+        plt.bar(layers, height=all_grads)
+        plt.xlabel("Layers")
+        plt.ylabel("Average Weight")
+        plt.title("Weight flow")
+        plt.grid(True)
+        plt.tight_layout()
+
+        return plt
 
     def plot_func_def(self,all_grads, layers):
         """
@@ -307,13 +342,21 @@ class ExperimentBuilder(nn.Module):
             
             ################################################################
             ##### Plot Gradient Flow at each Epoch during Training  ######
-            print("Generating Gradient Flow Plot at epoch {}".format(epoch_idx))
+            # print("Generating Gradient Flow Plot at epoch {}".format(epoch_idx))
             plt = self.plot_grad_flow(self.model.named_parameters())
             if not os.path.exists(os.path.join(self.experiment_saved_models, 'gradient_flow_plots')):
                 os.mkdir(os.path.join(self.experiment_saved_models, 'gradient_flow_plots'))
                 # plt.legend(loc="best")
             plt.savefig(os.path.join(self.experiment_saved_models, 'gradient_flow_plots', "epoch{}.pdf".format(str(epoch_idx))))
             ################################################################
+
+            plt = self.plot_weight_flow(self.model.named_parameters())
+            if not os.path.exists(os.path.join(self.experiment_saved_models, 'weight_flow_plots')):
+                os.mkdir(os.path.join(self.experiment_saved_models, 'weight_flow_plots'))
+                # plt.legend(loc="best")
+            plt.savefig(
+                os.path.join(self.experiment_saved_models, 'weight_flow_plots', "epoch{}.pdf".format(str(epoch_idx))))
+
         
         print("Generating test set evaluation metrics")
         self.load_model(model_save_dir=self.experiment_saved_models, model_idx=self.best_val_model_idx,
