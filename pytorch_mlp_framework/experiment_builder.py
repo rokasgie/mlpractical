@@ -79,7 +79,7 @@ class ExperimentBuilder(nn.Module):
 
         self.learning_rate_scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer,
                                                                             T_max=num_epochs,
-                                                                            eta_min=0.00002)
+                                                                            eta_min=0.0002)
 
         # self.learning_rate_scheduler = optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=1)
 
