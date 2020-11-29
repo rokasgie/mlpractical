@@ -125,19 +125,8 @@ class ExperimentBuilder(nn.Module):
         return total_num_params
 
     def plot_weight_flow(self, named_parameters):
-        """
-        The function is being called in Line 298 of this file.
-        Receives the parameters of the model being trained. Returns plot of gradient flow for the given model parameters.
-
-        """
-        all_grads = []
+        all_weights = []
         layers = []
-
-        """
-        Complete the code in the block below to collect absolute mean of the gradients for each layer in all_grads with the
-        layer names in layers.
-        """
-        ########################################
 
         for n, p in named_parameters:
             if p.requires_grad and "bias" not in n:
@@ -147,20 +136,21 @@ class ExperimentBuilder(nn.Module):
                 else:
                     name = names[1]
                 layers.append(name)
-                all_grads.append(p.data.abs().mean().item())
+                all_weights.append(p.data.abs().mean().item())
 
-        ########################################
-
-        plt.bar(layers, height=all_grads, color="blue")
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.bar(layers, height=all_weights, color="blue")
+        plt.xticks(range(0, len(all_weights), 1), layers, rotation="vertical")
         plt.xlabel("Layers")
         plt.ylabel("Average Weight")
         plt.title("Weight flow")
         plt.grid(True)
         plt.tight_layout()
 
-        return plt
+        return fig
 
-    def plot_func_def(self,all_grads, layers):
+    def plot_func_def(self, all_grads, layers):
         """
         Plot function definition to plot the average gradient with respect to the number of layers in the given model
         :param all_grads: Gradients wrt weights for each layer in the model.
@@ -178,8 +168,7 @@ class ExperimentBuilder(nn.Module):
         plt.tight_layout()
         
         return plt
-        
-    
+
     def plot_grad_flow(self, named_parameters):
         """
         The function is being called in Line 298 of this file. 
@@ -206,11 +195,8 @@ class ExperimentBuilder(nn.Module):
                 all_grads.append(p.grad.abs().mean())
         
         ########################################
-            
-        
-        plt = self.plot_func_def(all_grads, layers)
-        
-        return plt
+
+        return self.plot_func_def(all_grads, layers)
 
     def run_train_iter(self, x, y):
         
@@ -347,15 +333,15 @@ class ExperimentBuilder(nn.Module):
             if not os.path.exists(os.path.join(self.experiment_saved_models, 'gradient_flow_plots')):
                 os.mkdir(os.path.join(self.experiment_saved_models, 'gradient_flow_plots'))
                 # plt.legend(loc="best")
-            plt.savefig(os.path.join(self.experiment_saved_models, 'gradient_flow_plots', "epoch{}.pdf".format(str(epoch_idx))))
+            plt.savefig(os.path.join(self.experiment_saved_models, 'gradient_flow_plots', "epoch{}.png".format(str(epoch_idx))))
             ################################################################
 
-            plt = self.plot_weight_flow(self.model.named_parameters())
+            fig = self.plot_weight_flow(self.model.named_parameters())
             if not os.path.exists(os.path.join(self.experiment_saved_models, 'weight_flow_plots')):
                 os.mkdir(os.path.join(self.experiment_saved_models, 'weight_flow_plots'))
                 # plt.legend(loc="best")
-            plt.savefig(
-                os.path.join(self.experiment_saved_models, 'weight_flow_plots', "epoch{}.pdf".format(str(epoch_idx))))
+            fig.savefig(
+                os.path.join(self.experiment_saved_models, 'weight_flow_plots', "epoch{}.png".format(str(epoch_idx))))
 
         
         print("Generating test set evaluation metrics")
