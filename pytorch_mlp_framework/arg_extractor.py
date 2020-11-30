@@ -22,7 +22,7 @@ def get_args():
     parser.add_argument('--lr', nargs="?", type=float, default=0.001, help='Learning rate')
     parser.add_argument('--continue_from_epoch', nargs="?", type=int, default=-1,
                         help='Epoch you want to continue training from while restarting an experiment')
-    parser.add_argument('--seed', nargs="?", type=int, default=7112018,
+    parser.add_argument('--seed', nargs="?", type=int, default=0,
                         help='Seed to use for random number generator for experiment')
     parser.add_argument('--image_num_channels', nargs="?", type=int, default=3,
                         help='The channel dimensionality of our image-data')
