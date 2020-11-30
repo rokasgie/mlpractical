@@ -70,18 +70,15 @@ class ExperimentBuilder(nn.Module):
             total_num_parameters += np.prod(value.shape)
 
         print('Total number of parameters', total_num_parameters)
-        # print('Total number of conv layers', num_conv_layers)
-        # print('Total number of linear layers', num_linear_layers)
-        #print(self)
 
         self.optimizer = optim.Adam(self.parameters(), lr=learning_rate, amsgrad=False,
                                     weight_decay=weight_decay_coefficient)
 
         self.learning_rate_scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer,
                                                                             T_max=num_epochs,
-                                                                            eta_min=0.0002)
+                                                                            eta_min=0.00002)
 
-        self.learning_rate_scheduler = optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.99)
+        # self.learning_rate_scheduler = optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.99)
 
         # Generate the directory names
         self.experiment_folder = os.path.abspath(experiment_name)
@@ -212,7 +209,7 @@ class ExperimentBuilder(nn.Module):
         loss.backward()  # backpropagate to compute gradients for current iter loss
 
         self.optimizer.step()  # update network parameters
-        #self.learning_rate_scheduler.step()
+        self.learning_rate_scheduler.step()
 
         _, predicted = torch.max(out.data, 1)  # get argmax of predictions
         accuracy = np.mean(list(predicted.eq(y.data).cpu()))  # compute accuracy
@@ -284,7 +281,6 @@ class ExperimentBuilder(nn.Module):
                     current_epoch_losses["train_acc"].append(accuracy)  # add current iter acc to the train acc list
                     pbar_train.update(1)
                     pbar_train.set_description("loss: {:.4f}, accuracy: {:.4f}".format(loss, accuracy))
-                self.learning_rate_scheduler.step()
 
             with tqdm.tqdm(total=len(self.val_data)) as pbar_val:  # create a progress bar for validation
                 for x, y in self.val_data:  # get data batches
