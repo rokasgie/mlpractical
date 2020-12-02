@@ -74,11 +74,7 @@ class ExperimentBuilder(nn.Module):
         self.optimizer = optim.Adam(self.parameters(), lr=learning_rate, amsgrad=False,
                                     weight_decay=weight_decay_coefficient)
 
-        self.learning_rate_scheduler = optim.lr_scheduler.CosineAnnealingLR(self.optimizer,
-                                                                            T_max=num_epochs,
-                                                                            eta_min=0.00002)
-
-        # self.learning_rate_scheduler = optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.99)
+        self.learning_rate_scheduler = optim.lr_scheduler.ExponentialLR(self.optimizer, gamma=0.99)
 
         # Generate the directory names
         self.experiment_folder = os.path.abspath(experiment_name)
@@ -209,7 +205,6 @@ class ExperimentBuilder(nn.Module):
         loss.backward()  # backpropagate to compute gradients for current iter loss
 
         self.optimizer.step()  # update network parameters
-        self.learning_rate_scheduler.step()
 
         _, predicted = torch.max(out.data, 1)  # get argmax of predictions
         accuracy = np.mean(list(predicted.eq(y.data).cpu()))  # compute accuracy
@@ -282,6 +277,8 @@ class ExperimentBuilder(nn.Module):
                     pbar_train.update(1)
                     pbar_train.set_description("loss: {:.4f}, accuracy: {:.4f}".format(loss, accuracy))
 
+            self.learning_rate_scheduler.step()
+
             with tqdm.tqdm(total=len(self.val_data)) as pbar_val:  # create a progress bar for validation
                 for x, y in self.val_data:  # get data batches
                     loss, accuracy = self.run_evaluation_iter(x=x, y=y)  # run a validation iter
@@ -332,12 +329,12 @@ class ExperimentBuilder(nn.Module):
             plt.savefig(os.path.join(self.experiment_saved_models, 'gradient_flow_plots', "epoch{}.png".format(str(epoch_idx))))
             ################################################################
 
-            fig = self.plot_weight_flow(self.model.named_parameters())
-            if not os.path.exists(os.path.join(self.experiment_saved_models, 'weight_flow_plots')):
-                os.mkdir(os.path.join(self.experiment_saved_models, 'weight_flow_plots'))
-                # plt.legend(loc="best")
-            fig.savefig(
-                os.path.join(self.experiment_saved_models, 'weight_flow_plots', "epoch{}.png".format(str(epoch_idx))))
+            # fig = self.plot_weight_flow(self.model.named_parameters())
+            # if not os.path.exists(os.path.join(self.experiment_saved_models, 'weight_flow_plots')):
+            #     os.mkdir(os.path.join(self.experiment_saved_models, 'weight_flow_plots'))
+            #     # plt.legend(loc="best")
+            # fig.savefig(
+            #     os.path.join(self.experiment_saved_models, 'weight_flow_plots', "epoch{}.png".format(str(epoch_idx))))
 
         
         print("Generating test set evaluation metrics")
